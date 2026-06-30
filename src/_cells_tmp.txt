@@ -1,0 +1,82 @@
+# ── 3. Top-10 classes com maior e menor acurácia ─────────────────────────────
+acuracia_por_classe = []
+for i in range(100):
+    mask = y_true == i
+    if mask.sum() > 0:
+        acc = (y_pred[mask] == i).mean()
+        acuracia_por_classe.append((nomes_classes[i], acc))
+
+acuracia_por_classe.sort(key=lambda x: x[1])
+
+piores  = acuracia_por_classe[:10]
+melhores = acuracia_por_classe[-10:][::-1]
+
+fig, axes = plt.subplots(1, 2, figsize=(16, 6))
+fig.suptitle('Acurácia por Classe — WRN-28-10 CIFAR-100', fontsize=13, fontweight='bold')
+
+# Piores
+nomes_p, vals_p = zip(*piores)
+bars = axes[0].barh(nomes_p, vals_p, color='tomato')
+axes[0].set_title('10 Classes com Menor Acurácia')
+axes[0].set_xlabel('Acurácia')
+axes[0].set_xlim(0, 1)
+axes[0].bar_label(bars, fmt='%.2f', padding=3, fontsize=9)
+axes[0].grid(True, axis='x', alpha=0.3)
+
+# Melhores
+nomes_m, vals_m = zip(*melhores)
+bars = axes[1].barh(nomes_m, vals_m, color='royalblue')
+axes[1].set_title('10 Classes com Maior Acurácia')
+axes[1].set_xlabel('Acurácia')
+axes[1].set_xlim(0, 1)
+axes[1].bar_label(bars, fmt='%.2f', padding=3, fontsize=9)
+axes[1].grid(True, axis='x', alpha=0.3)
+
+plt.tight_layout()
+plt.savefig(os.path.join(run_dir, 'acuracia_por_classe.png'), dpi=150, bbox_inches='tight')
+plt.show()
+
+=====
+
+correct = np.where(y_pred == y_true)[0]
+
+plt.figure(figsize=(15,10))
+
+for i, idx in enumerate(np.random.choice(correct, 25, replace=False)):
+    plt.subplot(5,5,i+1)
+    plt.imshow(x_teste[idx])
+    plt.axis("off")
+    plt.title(nomes_classes[y_pred[idx]], fontsize=8, color='green')
+
+plt.suptitle("Exemplos de classificações corretas", fontsize=16)
+plt.tight_layout()
+plt.show()
+
+=====
+
+wrong = np.where(y_pred != y_true)[0]
+
+plt.figure(figsize=(15,10))
+
+for i, idx in enumerate(np.random.choice(wrong, 25, replace=False)):
+    plt.subplot(5,5,i+1)
+    plt.imshow(x_teste[idx])
+    plt.axis("off")
+
+    plt.title(
+        f"R:{nomes_classes[y_true[idx]]}\nP:{nomes_classes[y_pred[idx]]}",
+        fontsize=7,
+        color="red"
+    )
+
+plt.suptitle("Classificações incorretas", fontsize=16)
+plt.tight_layout()
+plt.show()
+
+=====
+
+conf = np.max(y_pred_probs[idx])
+
+plt.title(
+    f"P:{nomes_classes[y_pred[idx]]}\n{conf*100:.1f}%"
+)
